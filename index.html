@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinPortfolio | Money Manager</title>
+<style>
+:root {
+  --wine:#681f35;
+  --wine-dark:#4c1728;
+  --bg:#f8f7f6;
+  --text:#29252a;
+  --muted:#898187;
+  --line:#eee9eb;
+  --green:#25845e;
+  --red:#b84f5a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.sidebar{position:fixed;top:0;bottom:0;left:0;width:230px;background:white;border-right:1px solid var(--line);padding:25px 17px}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:40px}
+.logo{background:var(--wine);color:white;border-radius:10px;padding:12px;font-weight:bold}
+.brand b{font-size:17px}
+.brand small{display:block;color:var(--muted);font-size:8px;letter-spacing:1px;margin-top:4px}
+.nav-title{font-size:9px;color:#a3979b;letter-spacing:1.5px;margin:20px 10px 12px}
+.nav button{width:100%;text-align:left;padding:13px;border:0;background:white;color:#686168;border-radius:7px;margin-bottom:5px;font-size:12px}
+.nav button.active,.nav button:hover{background:#f7eef1;color:var(--wine)}
+.nav button span{display:inline-block;width:27px;font-size:16px}
+.sidebar-note{position:absolute;bottom:22px;left:17px;right:17px;padding:13px;background:#faf5f6;border-radius:9px;font-size:10px;color:#786b70;line-height:1.6}
+.main{margin-left:230px;padding:0 30px 30px}
+.topbar{height:75px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;margin-bottom:27px}
+.eyebrow{font-size:9px;letter-spacing:1.4px;color:#a18b92;font-weight:bold}
+.topbar h3{font-size:16px;margin:5px 0}
+.guest{border:1px solid var(--line);background:white;padding:8px 12px;border-radius:20px;font-size:10px;color:#71676b}
+.page{display:none}
+.page.active{display:block}
+.heading{display:flex;justify-content:space-between;align-items:flex-end;gap:15px;margin-bottom:22px}
+.heading h1{font-size:28px;letter-spacing:-1px;margin:8px 0 5px}
+.heading h1 em{font-style:normal;color:var(--wine)}
+.muted{font-size:11px;color:var(--muted);line-height:1.6}
+.btn{border:1px solid transparent;border-radius:7px;padding:10px 14px;font-size:11px;font-weight:bold}
+.primary{background:var(--wine);color:white}
+.secondary{background:white;border-color:#e8dfe2;color:#51464a}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:15px}
+.metric,.panel{background:white;border:1px solid var(--line);border-radius:10px;padding:17px}
+.metric span{font-size:11px;color:#827b80}
+.metric strong{display:block;font-size:23px;margin:12px 0 5px}
+.metric small{font-size:9px;color:#aaa}
+.metric.featured{background:var(--wine);color:white;border-color:var(--wine)}
+.metric.featured span,.metric.featured small{color:#e6cbd3}
+.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-bottom:14px}
+.panel h3{font-size:14px;margin:0 0 5px}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:10px}
+.month{border:1px solid var(--line);border-radius:6px;padding:8px;font-size:11px}
+.chart{height:170px;display:grid;grid-template-columns:repeat(6,1fr);gap:12px;align-items:end;border-bottom:1px solid var(--line)}
+.bar-column{height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px}
+.bars{height:140px;display:flex;align-items:flex-end;gap:4px}
+.bar{width:16px;border-radius:4px 4px 0 0;min-height:2px}
+.in-bar{background:#9cc6af}
+.out-bar{background:#c98c9b}
+.bar-column small{font-size:9px;color:#999}
+.legend{display:flex;gap:15px;margin-top:12px;font-size:10px;color:#999}
+.legend i{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:5px}
+.health{margin:15px 0}
+.health-top{display:flex;justify-content:space-between;font-size:10px;margin-bottom:7px}
+.health-top span:last-child{color:#938b90}
+.track{height:7px;background:#f0edef;border-radius:20px;overflow:hidden}
+.fill{height:100%;background:var(--wine);border-radius:20px}
+.fill.over{background:var(--red)}
+.txrow{display:flex;justify-content:space-between;gap:8px;padding:11px 0;border-bottom:1px solid #f2eff0}
+.txname{font-size:11px;font-weight:bold}
+.txmeta{font-size:9px;color:#a29a9f;margin-top:4px}
+.amount{font-size:11px;font-weight:bold;white-space:nowrap}
+.amount.income{color:var(--green)}
+.quick{display:flex;align-items:center;gap:10px;padding:12px 0;border:0;border-top:1px solid #f1edef;background:white;width:100%;text-align:left}
+.quick-icon{width:32px;height:32px;border-radius:8px;background:#f8edf0;color:var(--wine);display:grid;place-items:center}
+.quick b{font-size:11px}
+.quick small{display:block;color:#999;font-size:9px;margin-top:4px}
+.quick .arrow{margin-left:auto;color:#a78c94}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
+.filters input,.filters select{padding:9px;border:1px solid var(--line);border-radius:6px;background:white;font-size:11px}
+.filters input[type=search]{flex:1;min-width:140px}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th{text-align:left;color:#a0969b;font-size:9px;padding:11px 8px;border-bottom:1px solid var(--line)}
+td{font-size:11px;padding:12px 8px;border-bottom:1px solid #f3eff0}
+td:last-child,th:last-child{text-align:right}
+.table-wrap{overflow:auto}
+.text-btn{border:0;background:none;color:var(--wine);font-weight:bold;font-size:10px}
+.badge{font-size:9px;padding:5px 7px;border-radius:15px}
+.badge.income{background:#e9f5ef;color:var(--green)}
+.badge.expense{background:#faeeee;color:var(--red)}
+.empty{text-align:center;color:#999;padding:30px 12px;font-size:11px}
+.empty b{display:block;color:#4e454a;margin-bottom:5px}
+.budget-item{padding:14px 0;border-bottom:1px solid var(--line)}
+.budget-head,.budget-foot{display:flex;justify-content:space-between;gap:8px;font-size:10px}
+.budget-head b{font-size:11px}
+.budget-head span,.budget-foot{color:#8f878c}
+.budget-foot{margin-top:7px}
+.goal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:13px}
+.goal-card{background:white;border:1px solid var(--line);border-radius:10px;padding:17px}
+.goal-card h3{font-size:13px;margin:0 0 5px}
+.goal-card small{font-size:9px;color:#999}
+.goal-pct{font-size:22px;font-weight:bold;color:var(--wine);margin:17px 0 7px}
+.goal-amount{display:flex;justify-content:space-between;font-size:10px;color:#888;margin-top:8px}
+.goal-actions{display:flex;gap:6px;margin-top:15px}
+.goal-actions button{flex:1}
+.two-col{display:grid;grid-template-columns:1.1fr 1fr;gap:14px}
+.field{display:grid;gap:7px;margin:14px 0;font-size:11px;font-weight:bold;color:#625b60}
+.field input,.field select{padding:10px;border:1px solid #e8e1e3;border-radius:7px;width:100%;background:white}
+.result{background:#faf4f6;padding:15px;border-radius:9px;margin-top:18px}
+.result small{color:#927e85}
+.result strong{display:block;font-size:24px;color:var(--wine);margin:7px 0 12px}
+.note{padding:12px 0;border-top:1px solid var(--line)}
+.note b{font-size:11px}
+.note span{display:block;color:#888;font-size:10px;line-height:1.6;margin-top:4px}
+.footer{display:flex;justify-content:space-between;gap:12px;color:#aaa;font-size:9px;padding-top:24px}
+.modal-bg{display:none;position:fixed;inset:0;background:#21171ca8;z-index:20;align-items:center;justify-content:center;padding:15px}
+.modal-bg.show{display:flex}
+.modal{background:white;border-radius:12px;padding:22px;width:min(100%,440px);max-height:90vh;overflow:auto}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.modal h2{font-size:18px;margin:6px 0}
+.close{border:0;border-radius:50%;width:29px;height:29px;font-size:19px;background:#f5f0f2}
+.modal label{display:grid;gap:7px;margin:13px 0;font-size:11px;font-weight:bold;color:#625b60}
+.modal input,.modal select{padding:10px;border:1px solid #e8e1e3;border-radius:7px;width:100%}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toggle{display:grid;grid-template-columns:1fr 1fr;background:#f6f2f3;padding:4px;border-radius:7px}
+.toggle label{margin:0}
+.toggle input{display:none}
+.toggle span{display:block;text-align:center;padding:9px;border-radius:5px}
+.toggle input:checked+span{background:white;color:var(--wine);font-weight:bold}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.toast{position:fixed;bottom:20px;right:20px;background:#282126;color:white;padding:12px 16px;border-radius:7px;font-size:11px;opacity:0;transition:.2s;z-index:30}
+.toast.show{opacity:1}
+@media(max-width:950px){.metrics{grid-template-columns:repeat(2,1fr)}.goal-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.sidebar{position:static;width:auto;height:auto;padding:13px}.brand{margin:0}.nav-title,.nav,.sidebar-note{display:none}.main{margin:0;padding:0 13px 20px}.topbar{height:60px}.grid,.two-col{grid-template-columns:1fr}.goal-grid{grid-template-columns:1fr}.heading{align-items:flex-start;flex-direction:column}.metrics{gap:8px}.metric{padding:12px}.metric strong{font-size:19px}.panel{padding:14px}.footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+ <div class="brand"><div class="logo">FP</div><div><b>FinPortfolio</b><small>WHERE FINANCE MEETS CLARITY</small></div></div>
+ <div class="nav-title">WORKSPACE</div>
+ <nav class="nav">
+  <button class="active" data-page="overview"><span>▦</span>Overview</button>
+  <button data-page="transactions"><span>↕</span>Transactions</button>
+  <button data-page="budget"><span>▤</span>Monthly budget</button>
+  <button data-page="goals"><span>◎</span>Savings goals</button>
+  <button data-page="emergency"><span>⌂</span>Emergency fund</button>
+ </nav>
+ <div class="sidebar-note"><b>Your money. Your control.</b><br>Guest workspace. Your data stays in this browser on this device. Export your records regularly.</div>
+</aside>
+<main class="main">
+<header class="topbar"><div><div class="eyebrow">PERSONAL FINANCE WORKSPACE</div><h3 id="pageTitle">Overview</h3></div><span class="guest">● Guest mode · Local storage</span></header>
+
+<section class="page active" id="overview">
+ <div class="heading"><div><div class="eyebrow">YOUR FINANCIAL SNAPSHOT</div><h1>Make your money <em>work smarter.</em></h1><div class="muted">Understand what comes in, what goes out, and what you are building.</div></div><input type="month" class="month" id="ovMonth"></div>
+ <div class="metrics">
+  <div class="metric"><span>Total income</span><strong id="income">₹0</strong><small>Recorded this month</small></div>
+  <div class="metric"><span>Total expenses</span><strong id="expense">₹0</strong><small>Recorded this month</small></div>
+  <div class="metric featured"><span>Available balance</span><strong id="balance">₹0</strong><small>Income minus expenses</small></div>
+  <div class="metric"><span>Savings rate</span><strong id="savings">0%</strong><small>Balance as a share of income</small></div>
+ </div>
+ <div class="grid">
+  <article class="panel"><div class="panel-head"><div><h3>Cash flow</h3><p class="muted">Income and expenses · last 6 months</p></div></div><div class="chart" id="chart"></div><div class="legend"><span><i style="background:#9cc6af"></i>Income</span><span><i style="background:#c98c9b"></i>Expenses</span></div></article>
+  <article class="panel"><div class="panel-head"><div><h3>Budget health</h3><p class="muted">Spending against planned limits</p></div><button class="text-btn" data-go="budget">Manage</button></div><div id="health"></div></article>
+ </div>
+ <div class="grid">
+  <article class="panel"><div class="panel-head"><div><h3>Recent transactions</h3><p class="muted">Latest money movements</p></div><button class="text-btn" data-go="transactions">View all</button></div><div id="recent"></div></article>
+  <article class="panel"><div class="panel-head"><div><h3>Quick actions</h3><p class="muted">Keep your plan updated</p></div></div>
+   <button class="quick" id="quickExpense"><span class="quick-icon">−</span><span><b>Add an expense</b><small>Record money you spent</small></span><span class="arrow">→</span></button>
+   <button class="quick" id="quickIncome"><span class="quick-icon">＋</span><span><b>Add income</b><small>Record money you received</small></span><span class="arrow">→</span></button>
+   <button class="quick" data-go="goals"><span class="quick-icon">◎</span><span><b>Create savings goal</b><small>Give your savings a purpose</small></span><span class="arrow">→</span></button>
+  </article>
+ </div>
+</section>
+
+<section class="page" id="transactions">
+ <div class="heading"><div><div class="eyebrow">MONEY MOVEMENT</div><h1>Transactions</h1><div class="muted">Record income and expenses to understand your cash flow.</div></div><div><button class="btn secondary" id="exportCSV">Export CSV</button> <button class="btn primary" id="addTx">＋ Add transaction</button></div></div>
+ <article class="panel"><div class="filters"><input type="month" id="txMonth"><select id="txType"><option value="all">All types</option><option value="income">Income</option><option value="expense">Expense</option></select><select id="txCategoryFilter"><option value="all">All categories</option></select><input type="search" id="searchTx" placeholder="Search description..."></div><div id="txList"></div></article>
+</section>
+
+<section class="page" id="budget">
+ <div class="heading"><div><div class="eyebrow">SPENDING PLAN</div><h1>Monthly budget</h1><div class="muted">Set spending limits and compare them with actual expenses.</div></div><button class="btn primary" id="addBudget">＋ Set category budget</button></div>
+ <div class="metrics" style="grid-template-columns:repeat(3,1fr)"><div class="metric"><span>Total planned</span><strong id="planned">₹0</strong></div><div class="metric"><span>Amount spent</span><strong id="spent">₹0</strong></div><div class="metric"><span>Budget remaining</span><strong id="remaining">₹0</strong></div></div>
+ <article class="panel"><div class="panel-head"><div><h3>Category performance</h3><p class="muted">Select a month to review your budget.</p></div><input type="month" class="month" id="budgetMonth"></div><div id="budgetList"></div></article>
+</section>
+
+<section class="page" id="goals">
+ <div class="heading"><div><div class="eyebrow">FUTURE YOU</div><h1>Savings goals</h1><div class="muted">Turn a financial intention into a measurable target.</div></div><button class="btn primary" id="addGoal">＋ Create a goal</button></div>
+ <article class="panel" style="margin-bottom:14px;background:#f8f0f2"><b style="color:var(--wine);font-size:12px">Small, consistent contributions add up.</b><div class="muted">Set a target amount and deadline. Update your saved amount as you make progress.</div></article>
+ <div class="goal-grid" id="goalList"></div>
+</section>
+
+<section class="page" id="emergency">
+ <div class="heading"><div><div class="eyebrow">FINANCIAL RESILIENCE</div><h1>Emergency fund planner</h1><div class="muted">Estimate a practical cash reserve for unexpected expenses.</div></div></div>
+ <div class="two-col">
+  <article class="panel"><h3>Build your safety net</h3><p class="muted">Use essential monthly expenses, not your full lifestyle spending.</p>
+   <label class="field">Essential monthly expenses (₹)<input type="number" min="0" id="essential" placeholder="e.g. 18000"></label>
+   <label class="field">Months of cover<select id="months"><option value="3">3 months — starter</option><option value="6" selected>6 months — common target</option><option value="9">9 months — higher cushion</option><option value="12">12 months — extended cushion</option></select></label>
+   <label class="field">Current emergency savings (₹)<input type="number" min="0" id="current" placeholder="e.g. 25000"></label>
+   <div class="result"><small>Recommended emergency fund</small><strong id="target">₹0</strong><div class="track"><div class="fill" id="emProgress" style="width:0%"></div></div><p class="muted" id="emText">Enter your expenses to calculate your target.</p></div>
+  </article>
+  <article class="panel"><h3>How much should you keep?</h3><p class="muted">A common planning range is 3–6 months of essential expenses. People with variable income, dependants, or limited insurance may prefer a larger buffer.</p>
+   <div class="note"><b>Keep it accessible</b><span>Prioritise liquidity and capital preservation over high returns. An emergency fund is not meant to maximise investment performance.</span></div>
+   <div class="note"><b>Separate it from daily spending</b><span>Consider a dedicated savings account or another suitable low-risk, accessible option. Understand withdrawal rules and risks.</span></div>
+   <div class="note"><b>Revisit your target</b><span>Update it when rent, family responsibilities, income, or essential expenses change.</span></div>
+  </article>
+ </div>
+</section>
+<footer class="footer"><span>© 2026 FinPortfolio · Where Finance Meets Clarity</span><span>Educational planning tool · Not investment advice</span></footer>
+</main>
+
+<div class="modal-bg" id="txModal"><div class="modal"><div class="modal-head"><div><div class="eyebrow">MONEY MOVEMENT</div><h2 id="txTitle">Add transaction</h2></div><button class="close" data-close="txModal">×</button></div>
+<form id="txForm"><input type="hidden" id="txId"><div class="toggle"><label><input type="radio" name="kind" value="expense" checked><span>Expense</span></label><label><input type="radio" name="kind" value="income"><span>Income</span></label></div>
+<label>Amount (₹)<input type="number" min=".01" step=".01" id="txAmount" required placeholder="0.00"></label>
+<div class="row"><label>Category<select id="txCategory"></select></label><label>Date<input type="date" id="txDate" required></label></div>
+<label>Description<input id="txDescription" maxlength="100" placeholder="e.g. Grocery shopping"></label>
+<div class="actions"><button type="button" class="btn secondary" data-close="txModal">Cancel</button><button class="btn primary">Save transaction</button></div></form></div></div>
+
+<div class="modal-bg" id="budgetModal"><div class="modal"><div class="modal-head"><div><div class="eyebrow">SPENDING PLAN</div><h2>Set category budget</h2></div><button class="close" data-close="budgetModal">×</button></div>
+<form id="budgetForm"><label>Month<input type="month" id="budgetFormMonth" required></label><label>Category<select id="budgetCategory"></select></label><label>Budget amount (₹)<input type="number" min=".01" step=".01" id="budgetAmount" required></label>
+<div class="actions"><button type="button" class="btn secondary" data-close="budgetModal">Cancel</button><button class="btn primary">Save budget</button></div></form></div></div>
+
+<div class="modal-bg" id="goalModal"><div class="modal"><div class="modal-head"><div><div class="eyebrow">SAVINGS PLAN</div><h2 id="goalTitle">Create a savings goal</h2></div><button class="close" data-close="goalModal">×</button></div>
+<form id="goalForm"><input type="hidden" id="goalId"><label>Goal name<input id="goalName" maxlength="60" required placeholder="e.g. Travel fund"></label>
+<div class="row"><label>Target amount (₹)<input type="number" min="1" id="goalTarget" required></label><label>Already saved (₹)<input type="number" min="0" id="goalSaved" value="0"></label></div>
+<label>Target date<input type="date" id="goalDate"></label>
+<div class="actions"><button type="button" class="btn secondary" data-close="goalModal">Cancel</button><button class="btn primary">Save goal</button></div></form></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const KEY="finportfolio_money_manager_v1";
+const CATS={
+ expense:["Food & groceries","Housing / rent","Transport","Utilities","Healthcare","Education","Shopping","Entertainment","Personal care","Travel","Family","Other"],
+ income:["Salary","Business income","Freelance","Interest / dividends","Gift","Other"]
+};
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(Number(n)||0);
+const today=()=>new Date().toISOString().slice(0,10);
+const currentMonth=()=>today().slice(0,7);
+const makeId=()=>crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random();
+const emptyState=()=>({transactions:[],budgets:[],goals:[],emergency:{essential:0,months:6,current:0}});
+function loadState(){try{return Object.assign(emptyState(),JSON.parse(localStorage.getItem(KEY)||"{}"));}catch(e){return emptyState();}}
+let state=loadState(),page="overview";
+function persist(){localStorage.setItem(KEY,JSON.stringify(state));render();}
+function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function notify(s){$("toast").textContent=s;$("toast").classList.add("show");clearTimeout(notify.timer);notify.timer=setTimeout(()=>$("toast").classList.remove("show"),2300);}
+function showModal(id){$(id).classList.add("show")}
+function hideModal(id){$(id).classList.remove("show")}
+function monthTransactions(m){return state.transactions.filter(t=>t.date.startsWith(m));}
+function sum(a,type){return a.filter(t=>!type||t.type===type).reduce((s,t)=>s+Number(t.amount),0);}
+function noData(title,desc){return `<div class="empty"><b>${title}</b>${desc}</div>`;}
+function navigate(p){page=p;document.querySelectorAll(".page").forEach(x=>x.classList.toggle("active",x.id===p));document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===p));$("pageTitle").textContent=({overview:"Overview",transactions:"Transactions",budget:"Monthly budget",goals:"Savings goals",emergency:"Emergency fund"})[p];render();}
+function renderOverview(){
+ const m=$("ovMonth").value||currentMonth(),a=monthTransactions(m),income=sum(a,"income"),expense=sum(a,"expense"),balance=income-expense;
+ $("income").textContent=money(income);$("expense").textContent=money(expense);$("balance").textContent=money(balance);$("savings").textContent=(income?Math.round(balance/income*100):0)+"%";
+ const date=new Date(m+"-01T00:00:00"),hist=[];
+ for(let i=5;i>=0;i--){const d=new Date(date.getFullYear(),date.getMonth()-i,1),key=d.toISOString().slice(0,7),x=monthTransactions(key);hist.push({label:d.toLocaleDateString("en-IN",{month:"short"}),income:sum(x,"income"),expense:sum(x,"expense")});}
+ const max=Math.max(1,...hist.flatMap(x=>[x.income,x.expense]));
+ $("chart").innerHTML=hist.map(x=>`<div class="bar-column"><div class="bars"><div class="bar in-bar" title="Income ${money(x.income)}" style="height:${Math.max(2,x.income/max*100)}%"></div><div class="bar out-bar" title="Expenses ${money(x.expense)}" style="height:${Math.max(2,x.expense/max*100)}%"></div></div><small>${x.label}</small></div>`).join("");
+ const budgets=state.budgets.filter(b=>b.month===m);
+ $("health").innerHTML=budgets.length?budgets.slice(0,6).map(b=>{const used=sum(a.filter(t=>t.type==="expense"&&t.category===b.category));const pct=used/b.amount*100;return `<div class="health"><div class="health-top"><b>${safe(b.category)}</b><span>${money(used)} / ${money(b.amount)}</span></div><div class="track"><div class="fill ${pct>100?"over":""}" style="width:${Math.min(100,pct)}%"></div></div></div>`;}).join(""):noData("No budgets set yet","Create category limits to monitor spending.");
+ const recent=[...state.transactions].sort((x,y)=>y.date.localeCompare(x.date)).slice(0,5);
+ $("recent").innerHTML=recent.length?recent.map(t=>`<div class="txrow"><div><div class="txname">${safe(t.description||t.category)}</div><div class="txmeta">${safe(t.category)} · ${t.date}</div></div><div class="amount ${t.type}">${t.type==="income"?"+":"−"}${money(t.amount)}</div></div>`).join(""):noData("No transactions yet","Add your first income or expense.");
+}
+function renderTransactions(){
+ const m=$("txMonth").value||currentMonth(),type=$("txType").value,cat=$("txCategoryFilter").value,q=$("searchTx").value.toLowerCase();
+ const a=state.transactions.filter(t=>t.date.startsWith(m)&&(type==="all"||t.type===type)&&(cat==="all"||t.category===cat)&&(`${t.description} ${t.category}`).toLowerCase().includes(q)).sort((x,y)=>y.date.localeCompare(x.date));
+ $("txList").innerHTML=a.length?`<div class="table-wrap"><table><thead><tr><th>DESCRIPTION</th><th>DATE</th><th>TYPE</th><th>AMOUNT</th><th>ACTIONS</th></tr></thead><tbody>${a.map(t=>`<tr><td><b>${safe(t.description||t.category)}</b><br><span class="muted">${safe(t.category)}</span></td><td>${t.date}</td><td><span class="badge ${t.type}">${t.type}</span></td><td><b>${money(t.amount)}</b></td><td><button class="text-btn" data-edit="${t.id}">Edit</button> <button class="text-btn" data-delete="${t.id}">Delete</button></td></tr>`).join("")}</tbody></table></div>`:noData("No matching transactions","Try another month or add a transaction.");
+}
+function renderBudget(){
+ const m=$("budgetMonth").value||currentMonth(),budgets=state.budgets.filter(b=>b.month===m),a=monthTransactions(m);
+ const planned=budgets.reduce((s,b)=>s+b.amount,0),spent=sum(a,"expense");
+ $("planned").textContent=money(planned);$("spent").textContent=money(spent);$("remaining").textContent=money(planned-spent);
+ $("budgetList").innerHTML=budgets.length?budgets.map(b=>{const used=sum(a.filter(t=>t.type==="expense"&&t.category===b.category)),pct=used/b.amount*100;return `<div class="budget-item"><div class="budget-head"><b>${safe(b.category)}</b><span>${money(used)} spent of ${money(b.amount)}</span></div><div class="track" style="margin-top:9px"><div class="fill ${pct>100?"over":""}" style="width:${Math.min(100,pct)}%"></div></div><div class="budget-foot"><span>${pct.toFixed(0)}% used · ${used>b.amount?money(used-b.amount)+" over":money(b.amount-used)+" remaining"}</span><button class="text-btn" data-budget-delete="${b.id}">Remove</button></div></div>`;}).join(""):noData("No category budgets for this month","Add budgets for categories where you want to control spending.");
+}
+function renderGoals(){
+ $("goalList").innerHTML=state.goals.length?state.goals.map(g=>{const pct=Math.min(100,g.saved/g.target*100),left=Math.max(0,g.target-g.saved);return `<article class="goal-card"><div style="display:flex;justify-content:space-between"><div><h3>${safe(g.name)}</h3><small>${g.date?"Target date: "+g.date:"No target date"}</small></div><button class="text-btn" data-goal-edit="${g.id}">Edit</button></div><div class="goal-pct">${pct.toFixed(0)}%</div><div class="track"><div class="fill" style="width:${pct}%"></div></div><div class="goal-amount"><span>${money(g.saved)} saved</span><b>${money(g.target)} target</b></div><div class="goal-amount"><span>${left?money(left)+" to go":"Goal achieved"}</span></div><div class="goal-actions"><button class="btn secondary" data-goal-add="${g.id}">＋ Add savings</button><button class="btn secondary" data-goal-delete="${g.id}">Delete</button></div></article>`;}).join(""):noData("No savings goals yet","Create a goal for travel, education, a purchase, or your emergency reserve.");
+}
+function renderEmergency(){
+ const e=state.emergency,target=e.essential*e.months,pct=target?Math.min(100,e.current/target*100):0;
+ $("essential").value=e.essential||"";$("months").value=e.months||6;$("current").value=e.current||"";
+ $("target").textContent=money(target);$("emProgress").style.width=pct+"%";
+ $("emText").textContent=target?`${money(e.current)} saved · ${pct.toFixed(0)}% funded · ${money(Math.max(0,target-e.current))} remaining`:"Enter your expenses to calculate your target.";
+}
+function render(){if(page==="overview")renderOverview();if(page==="transactions")renderTransactions();if(page==="budget")renderBudget();if(page==="goals")renderGoals();if(page==="emergency")renderEmergency();}
+function setupCategories(){
+ const all=[...new Set([...CATS.expense,...CATS.income])];
+ $("txCategoryFilter").innerHTML='<option value="all">All categories</option>'+all.map(c=>`<option>${safe(c)}</option>`).join("");
+ $("budgetCategory").innerHTML=CATS.expense.map(c=>`<option>${safe(c)}</option>`).join("");
+ setTransactionType("expense");
+}
+function setTransactionType(type){document.querySelectorAll('input[name="kind"]').forEach(x=>x.checked=x.value===type);$("txCategory").innerHTML=CATS[type].map(c=>`<option>${safe(c)}</option>`).join("");}
+function openTransaction(t=null,type="expense"){
+ $("txForm").reset();$("txId").value=t?.id||"";$("txTitle").textContent=t?"Edit transaction":"Add transaction";
+ setTransactionType(t?.type||type);$("txAmount").value=t?.amount||"";$("txCategory").value=t?.category||CATS[type][0];$("txDate").value=t?.date||today();$("txDescription").value=t?.description||"";showModal("txModal");
+}
+function openGoal(g=null){
+ $("goalForm").reset();$("goalId").value=g?.id||"";$("goalTitle").textContent=g?"Edit savings goal":"Create a savings goal";
+ $("goalName").value=g?.name||"";$("goalTarget").value=g?.target||"";$("goalSaved").value=g?.saved||0;$("goalDate").value=g?.date||"";showModal("goalModal");
+}
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.page)));
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>navigate(b.dataset.go)));
+$("ovMonth").value=$("txMonth").value=$("budgetMonth").value=$("budgetFormMonth").value=currentMonth();
+setupCategories();
+$("ovMonth").onchange=renderOverview;$("txMonth").onchange=renderTransactions;$("txType").onchange=renderTransactions;$("txCategoryFilter").onchange=renderTransactions;$("searchTx").oninput=renderTransactions;$("budgetMonth").onchange=renderBudget;
+$("addTx").onclick=()=>openTransaction();$("quickExpense").onclick=()=>openTransaction(null,"expense");$("quickIncome").onclick=()=>openTransaction(null,"income");
+document.querySelectorAll('input[name="kind"]').forEach(x=>x.onchange=()=>setTransactionType(x.value));
+$("txForm").onsubmit=e=>{e.preventDefault();const t={id:$("txId").value||makeId(),type:document.querySelector('input[name="kind"]:checked').value,amount:Number($("txAmount").value),category:$("txCategory").value,date:$("txDate").value,description:$("txDescription").value.trim()};if(!Number.isFinite(t.amount)||t.amount<=0)return notify("Enter an amount greater than zero.");const i=state.transactions.findIndex(x=>x.id===t.id);if(i>=0)state.transactions[i]=t;else state.transactions.push(t);persist();hideModal("txModal");notify("Transaction saved.");};
+$("txList").onclick=e=>{const edit=e.target.closest("[data-edit]"),del=e.target.closest("[data-delete]");if(edit)openTransaction(state.transactions.find(t=>t.id===edit.dataset.edit));if(del&&confirm("Delete this transaction?")){state.transactions=state.transactions.filter(t=>t.id!==del.dataset.delete);persist();notify("Transaction deleted.");}};
+$("addBudget").onclick=()=>{$("budgetForm").reset();$("budgetFormMonth").value=$("budgetMonth").value||currentMonth();showModal("budgetModal");};
+$("budgetForm").onsubmit=e=>{e.preventDefault();const m=$("budgetFormMonth").value,c=$("budgetCategory").value,a=Number($("budgetAmount").value);if(a<=0)return notify("Enter a valid budget amount.");const b=state.budgets.find(x=>x.month===m&&x.category===c);if(b)b.amount=a;else state.budgets.push({id:makeId(),month:m,category:c,amount:a});$("budgetMonth").value=m;persist();hideModal("budgetModal");notify("Budget saved.");};
+$("budgetList").onclick=e=>{const b=e.target.closest("[data-budget-delete]");if(b&&confirm("Remove this budget?")){state.budgets=state.budgets.filter(x=>x.id!==b.dataset.budgetDelete);persist();}};
+$("addGoal").onclick=()=>openGoal();
+$("goalForm").onsubmit=e=>{e.preventDefault();const g={id:$("goalId").value||makeId(),name:$("goalName").value.trim(),target:Number($("goalTarget").value),saved:Number($("goalSaved").value)||0,date:$("goalDate").value};if(g.target<=0||g.saved<0)return notify("Enter valid goal amounts.");const i=state.goals.findIndex(x=>x.id===g.id);if(i>=0)state.goals[i]=g;else state.goals.push(g);persist();hideModal("goalModal");notify("Savings goal saved.");};
+$("goalList").onclick=e=>{const edit=e.target.closest("[data-goal-edit]"),add=e.target.closest("[data-goal-add]"),del=e.target.closest("[data-goal-delete]");if(edit)openGoal(state.goals.find(g=>g.id===edit.dataset.goalEdit));if(add){const g=state.goals.find(x=>x.id===add.dataset.goalAdd),v=prompt(`How much would you like to add to ${g.name}? (₹)`);if(v!==null){const n=Number(v);if(n>0){g.saved+=n;persist();notify("Savings progress updated.");}else notify("Enter a positive amount.");}}if(del&&confirm("Delete this goal?")){state.goals=state.goals.filter(g=>g.id!==del.dataset.goalDelete);persist();}};
+["essential","months","current"].forEach(k=>$(k).addEventListener("input",()=>{state.emergency={essential:Number($("essential").value)||0,months:Number($("months").value)||6,current:Number($("current").value)||0};localStorage.setItem(KEY,JSON.stringify(state));renderEmergency();}));
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>hideModal(b.dataset.close));
+document.querySelectorAll(".modal-bg").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)hideModal(m.id);}));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".modal-bg.show").forEach(m=>hideModal(m.id));});
+$("exportCSV").onclick=()=>{const rows=[["Date","Type","Category","Description","Amount"],...state.transactions.map(t=>[t.date,t.type,t.category,t.description,t.amount])];const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\r\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="finportfolio-transactions-"+currentMonth()+".csv";a.click();URL.revokeObjectURL(url);};
+render();
+</script>
+</body>
+</html>
